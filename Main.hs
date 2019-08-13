@@ -1,38 +1,76 @@
 module Main where
 
 import Paths_bash_inline (version)
+import Data.Bifunctor
+import Data.Semigroup ((<>))
 import Data.Version (showVersion)
 import qualified Language.Bash.Syntax as Bash
 import qualified Language.Bash.Parse  as Bash
 import qualified Language.Bash.Pretty as Bash
+import qualified Options.Applicative  as Opts
 import qualified System.Environment   as Environment
 import qualified System.Exit          as Exit
 import qualified System.IO            as IO
+import           Text.Replace                        (Replace(..), replaceWithList)
 
-printScript :: Bash.List -> IO ()
-printScript src = print (Bash.pretty src) 
+data Args = Args {
+    argOneLine :: !Bool
+  , argFile    :: Maybe String
+  } 
 
-printError :: Show a => a -> IO ()
-printError err = print err >> Exit.exitFailure
+data Script = Script {
+    scriptSource  :: String
+  , scriptContent :: String
+  } deriving Show
 
-inlineScript :: String -> IO.Handle -> IO ()
-inlineScript script hdl = do
-  parseResult <- Bash.parse script <$> IO.hGetContents hdl 
-  either printError printScript parseResult
+printStatements :: Bool -> [Bash.Statement] -> IO ()
+printStatements oneLine statements = do
+  let src = show $ Bash.pretty statements
+  if oneLine
+    then putStrLn $ replaceWithList [Replace "\n" " ", Replace "\t" " ", Replace "\r" ""] src 
+    else putStrLn src 
 
-printUsage :: IO ()
-printUsage = putStrLn $
-  "Usage: bash-inline [FILE]\n" ++
-  "Inline a Bash script FILE, or standard input, to standard output.\n\n" ++
-  "  --help     display this usage and exit\n" ++
-  "  --version  output version information and exit\n\n" ++
-  "With no FILE, read standard input."
-  
+parseScript :: Script -> Either String [Bash.Statement]
+parseScript (Script source content) = bimap show (\(Bash.List l) -> l) $ Bash.parse source content
+
+getScript :: Maybe String -> IO Script 
+getScript (Just path) = Script path <$> IO.readFile path 
+getScript (Nothing)   = Script "stdin" <$> IO.hGetContents IO.stdin
+
+runWithArgs :: Args -> IO ()
+runWithArgs (Args oneLine mfile) = do
+  script <- getScript mfile 
+  case parseScript script of
+    Left err         -> print err >> Exit.exitFailure 
+    Right statements -> printStatements oneLine statements
+
 main :: IO ()
-main = do
-  args <- Environment.getArgs
-  case args of
-    ["--help"]    -> printUsage >> Exit.exitFailure
-    ["--version"] -> putStrLn $ "bash-inline " ++ showVersion version
-    [path]        -> IO.openFile path IO.ReadMode >>= inlineScript path
-    []            -> inlineScript "stdin" IO.stdin
+main = Opts.execParser optsParser >>= runWithArgs
+  where
+    optsParser :: Opts.ParserInfo Args
+    optsParser = Opts.info (Opts.helper <*> versionOpt <*> programOpts) $
+         Opts.fullDesc 
+      <> Opts.header "bash-inline" 
+      <> Opts.progDesc "Inline a Bash script to standard output, by default read from standard input."
+
+    versionOpt :: Opts.Parser (a -> a)
+    versionOpt = Opts.infoOption ("bash-inline " ++ (showVersion version)) $ 
+         Opts.long "version" 
+      <> Opts.short 'v' 
+      <> Opts.help "Output version information and exit"
+
+    oneLineOpt :: Opts.Parser Bool
+    oneLineOpt = Opts.switch $
+          Opts.long "one-line" 
+       <> Opts.short 'o'
+       <> Opts.help "Output script in one line"
+
+    fileOpt :: Opts.Parser (Maybe String)
+    fileOpt = Opts.optional . Opts.strOption $
+          Opts.long "file" 
+       <> Opts.short 'f' 
+       <> Opts.metavar "FILE" 
+       <> Opts.help "Bash script FILE to read instead of standard input"
+
+    programOpts :: Opts.Parser Args
+    programOpts = Args <$> oneLineOpt <*> fileOpt
