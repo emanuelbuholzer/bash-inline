@@ -1,5 +1,9 @@
 # Revision history for bash-inline
 
+## 0.2.0.1  -- 2019-10-16
+
+* Bugfix newline escaping in error output.
+
 ## 0.2.0.0  -- 2019-10-16
 
 * Second release. API already broken.

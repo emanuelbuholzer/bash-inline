@@ -6,7 +6,7 @@ name:                bash-inline
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.2.0.0
+version:             0.2.0.1
 
 synopsis:            Bash script inlining
 
@@ -24,10 +24,11 @@ cabal-version:       >=1.10
 executable bash-inline
   main-is:             Main.hs
   default-language:    Haskell2010
-  extensions:
+  default-extensions:
                        OverloadedStrings
   build-depends:       base >=4.9 && <4.10,
                        language-bash == 0.8.0,
                        text-replace == 0.0.0.4,
-                       optparse-applicative == 0.15.1.0
+                       optparse-applicative == 0.15.1.0,
+                       parsec <= 3.1.11.0
   

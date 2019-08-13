@@ -11,6 +11,7 @@ import qualified Options.Applicative  as Opts
 import qualified System.Environment   as Environment
 import qualified System.Exit          as Exit
 import qualified System.IO            as IO
+import qualified Text.Parsec.Error    as Parsec              
 import           Text.Replace                        (Replace(..), replaceWithList)
 
 data Args = Args {
@@ -23,15 +24,15 @@ data Script = Script {
   , scriptContent :: String
   } deriving Show
 
-printStatements :: Bool -> [Bash.Statement] -> IO ()
+printStatements :: Bool -> Bash.List -> IO ()
 printStatements oneLine statements = do
   let src = show $ Bash.pretty statements
   if oneLine
     then putStrLn $ replaceWithList [Replace "\n" " ", Replace "\t" " ", Replace "\r" ""] src 
     else putStrLn src 
 
-parseScript :: Script -> Either String [Bash.Statement]
-parseScript (Script source content) = bimap show (\(Bash.List l) -> l) $ Bash.parse source content
+parseScript :: Script -> Either Parsec.ParseError Bash.List 
+parseScript (Script source content) = Bash.parse source content
 
 getScript :: Maybe String -> IO Script 
 getScript (Just path) = Script path <$> IO.readFile path 
