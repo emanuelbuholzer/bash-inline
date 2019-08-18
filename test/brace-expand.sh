@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo ein {A,B,C,E}ffe
+echo {1..24}
+echo {a..z}

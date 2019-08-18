@@ -1,5 +1,11 @@
 # Revision history for bash-inline
 
+## 0.3.0.0  -- 2019-10-22
+
+* Third release. It's getting better.
+* Use the rendering features of pretty to make rendering of one-liners more robust. 
+* Add additional paramters for controlling the maximum line length, the ribbon ratio and outputting the script.
+
 ## 0.2.0.1  -- 2019-10-16
 
 * Bugfix newline escaping in error output.
