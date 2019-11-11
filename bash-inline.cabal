@@ -20,6 +20,8 @@ maintainer:          contact@emanuelbuholzer.com
 category:            Language
 build-type:          Simple
 extra-source-files:  ChangeLog.md, README.md
+license:             MIT
+license-file:        LICENSE
 cabal-version:       >=1.10
 
 library
