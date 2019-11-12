@@ -9,7 +9,7 @@
 In order to format a Bash script to be readable you can run `bash-inline` without any further paramters.
 By default `bash-inline` reads your Bash script from standard input to standard output.
 
-```
+```bash
 # Given a Bash script like:
 # 
 # | #!/usr/bin/env bash
@@ -68,5 +68,5 @@ cabal install
 
 ## Special Thanks
 
-To everyone who contributed to [langugae-bash](http://hackage.haskell.org/package/language-bash) and [pretty](http://hackage.haskell.org/package/pretty) which provides the core functionality to this tool.
+To everyone who contributed to [language-bash](http://hackage.haskell.org/package/language-bash) and [pretty](http://hackage.haskell.org/package/pretty) which provides the core functionality to this tool.
 
