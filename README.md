@@ -52,13 +52,13 @@ This project is built with [GHC](http://www.haskell.org/ghc/) and [cabal-install
 Update dependencies and configure the project with tests enabled:
 ```bash
 cabal update 
-cabal configure --enable-tests
+cabal build --only-dependencies --enable-tests --enable-benchmarks
 ```
 
 Build the project and run tests:
 ```bash
-cabal build
-cabal test
+cabal build --enable-tests --enable-benchmarks all
+cabal test all
 ```
 
 If you want to install the latest version of `bash-inline`:
